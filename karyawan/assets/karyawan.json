@@ -1,0 +1,93 @@
+[
+    {
+        "nama": "Budi Setiawan",
+        "umur": 30,
+        "alamat": {
+            "jalan": "Jl. Pahlawan",
+            "kota": "Surabaya",
+            "provinsi": "Jawa Timur"
+        },
+        "hobi": [
+            "membaca",
+            "bersepeda"
+        ]
+    },
+    {
+        "nama": "Ferdinan Lubis",
+        "umur": 25,
+        "alamat": {
+            "jalan": "Jl. Cipto",
+            "kota": "Jakarta",
+            "provinsi": "DKI Jakarta"
+        },
+        "hobi": [
+            "menulis",
+            "makan"
+        ]
+    },
+    {
+        "nama": "Siti Nurhaliza",
+        "umur": 28,
+        "alamat": {
+            "jalan": "Jl. Merdeka",
+            "kota": "Bandung",
+            "provinsi": "Jawa Barat"
+        },
+        "hobi": [
+            "berkebun",
+            "memasak"
+        ]
+    },
+    {
+        "nama": "Ahmad Fauzi",
+        "umur": 35,
+        "alamat": {
+            "jalan": "Jl. Diponegoro",
+            "kota": "Yogyakarta",
+            "provinsi": "DI Yogyakarta"
+        },
+        "hobi": [
+            "bermain gitar",
+            "berenang"
+        ]
+    },
+    {
+        "nama": "Dewi Lestari",
+        "umur": 32,
+        "alamat": {
+            "jalan": "Jl. Sudirman",
+            "kota": "Medan",
+            "provinsi": "Sumatera Utara"
+        },
+        "hobi": [
+            "menyanyi",
+            "berjalan-jalan"
+        ]
+    },
+    {
+        "nama": "Rizky Pratama",
+        "umur": 27,
+        "alamat": {
+            "jalan": "Jl. Gatot Subroto",
+            "kota": "Semarang",
+            "provinsi": "Jawa Tengah"
+        },
+        "hobi": [
+            "bermain sepak bola",
+            "memancing"
+        ]
+    },
+    {
+        "nama": "Wahyu Putra",
+        "umur": 20,
+        "alamat": {
+            "jalan": "Jl. Gersik",
+            "kota": "Palembang",
+            "provinsi": "Sumatera Selatan"
+        },
+        "hobi": [
+            "makan",
+            "berkebun"
+        ]
+    }
+]
