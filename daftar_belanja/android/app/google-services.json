@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "191172132292",
+    "firebase_url": "https://my-first-project-54194-default-rtdb.firebaseio.com",
+    "project_id": "my-first-project-54194",
+    "storage_bucket": "my-first-project-54194.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:191172132292:android:74cef37db80e195309b891",
+        "android_client_info": {
+          "package_name": "com.example.daftar_belanja"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAK4S13l82mYyxyJtMCpsxWrLtY2yWzuCA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:191172132292:android:01a9a8a383d3005e09b891",
+        "android_client_info": {
+          "package_name": "com.example.pilem"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAK4S13l82mYyxyJtMCpsxWrLtY2yWzuCA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
