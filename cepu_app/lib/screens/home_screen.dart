@@ -19,6 +19,13 @@ class _HomeScreenState extends State<HomeScreen> {
       (route) => false,
     );
   }
+
+  String generateAvatarUrl(String? fullName) {
+    final formattedName = fullName!.trim().replaceAll(' ', '+');
+    return 'https://ui-avatars.com/api/?name=$formattedName&background=random';
+  }
+
+  
   String? _idToken;
   String? _uid;
   String? _email;
@@ -38,6 +45,8 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,18 +56,29 @@ class _HomeScreenState extends State<HomeScreen> {
         IconButton(
           onPressed: () => _signOut(context),
           icon: const Icon(Icons.logout),
+          tooltip: 'Sign Out',
         ),
       ]
       ),
-      body: Center(
-        child: Column(
-          children: [
+      body: Column(
+        children: [
+        Image.network(
+          generateAvatarUrl(
+            FirebaseAuth.instance.currentUser?.displayName.toString(),
+            ),
+            width:100,
+            height:100,
+            ),
+            SizedBox(height: 8.0),
+            Text(
+              FirebaseAuth.instance.currentUser!.displayName!,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
             Text("Your have been signed in with ID Token: $_idToken"),
             Text("current User: $_uid"),
             Text("Current Email: $_email"),
           ],
         ),
-      ),
     );
   }
 }
