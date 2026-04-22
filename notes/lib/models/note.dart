@@ -33,7 +33,7 @@ class Note {
     return {
       'title': title,
       'description': description,
-      'image_base_64': imageBase64,
+      'image_base64': imageBase64,
       'created_at': createdAt,
       'updated_at': updatedAt,
     };
