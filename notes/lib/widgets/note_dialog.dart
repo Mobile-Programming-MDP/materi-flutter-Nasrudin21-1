@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:notes/models/note.dart';
 import 'package:notes/services/note_service.dart';
+import 'package:geolocator/geolocator.dart';
 
 class NoteDialog extends StatefulWidget {
   final Note? note;
@@ -18,14 +19,18 @@ class _NoteDialogState extends State<NoteDialog> {
   final TextEditingController _descriptionController = TextEditingController();
   File? _imageFile;
   String? _base64Image;
+  String? _latitude;
+  String? _longitude;
 
   @override
   void initState() {
     super.initState();
     if (widget.note != null) {
       _titleController.text = widget.note!.title;
-      _descriptionController.text = widget.note!.title;
+      _descriptionController.text = widget.note!.description;
       _base64Image = widget.note!.imageBase64;
+      _latitude = widget.note!.latitude;
+      _longitude = widget.note!.longitude;
     }
   }
 
@@ -46,6 +51,57 @@ class _NoteDialogState extends State<NoteDialog> {
       print("No image selected.");
     }
   }
+
+
+  Future<void> _getLocation() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Layanan lokasi dinonaktifkan.")),
+        );
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.deniedForever ||
+            permission == LocationPermission.denied) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Izin lokasi ditolak.")),
+          );
+          return;
+        }
+      }
+
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+        timeLimit: Duration(seconds: 10),
+      );
+
+      setState(() {
+        _latitude = position.latitude.toString();
+        _longitude = position.longitude.toString();
+      });
+
+    } catch (e) {
+      debugPrint("Error mendapatkan lokasi: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Gagal mendapatkan lokasi.")),
+      );
+      setState(() {
+        _latitude = null;
+        _longitude = null;
+      });
+    }
+  }
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -106,6 +162,8 @@ class _NoteDialogState extends State<NoteDialog> {
                   title: _titleController.text,
                   description: _descriptionController.text,
                   imageBase64: _base64Image,
+                  latitude: _latitude,
+                  longitude: _longitude,
                 ),
               ).whenComplete(() {
                 Navigator.of(context).pop();
@@ -118,6 +176,8 @@ class _NoteDialogState extends State<NoteDialog> {
                   description: _descriptionController.text,
                   createdAt: widget.note!.createdAt,
                   imageBase64: _base64Image,
+                  latitude: _latitude,
+                  longitude: _longitude,
                 ),
               ).whenComplete(() => Navigator.of(context).pop());
             }
