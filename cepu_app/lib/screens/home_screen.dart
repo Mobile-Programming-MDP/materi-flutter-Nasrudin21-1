@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cepu_app/screens/sign_in_screen.dart';
+import 'package:cepu_app/screens/add_post_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -79,6 +80,12 @@ class _HomeScreenState extends State<HomeScreen> {
             Text("Current Email: $_email"),
           ],
         ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: (){
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const AddPostScreen()),
+            );
+          }),
     );
   }
 }
