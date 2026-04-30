@@ -219,6 +219,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
     }
   }
 
+
   @override
   void dispose() {
     _descriptionController.dispose();
@@ -261,6 +262,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
+            
             const SizedBox(height: 16),
             OutlinedButton(
               onPressed: (_isSubmitting || _isGettingLocation)
