@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
 
 class AddPostScreen extends StatefulWidget {
   const AddPostScreen({super.key});
@@ -20,6 +21,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
   String? _latitude;
   String? _longitude;
   String? _category;
+  bool _isGenerating = false;
   bool _isSubmitting = false;
   bool _isGettingLocation = false;
   List<String> get categories {
@@ -220,12 +222,78 @@ class _AddPostScreenState extends State<AddPostScreen> {
   }
 
 
+
   @override
   void dispose() {
     _descriptionController.dispose();
     super.dispose();
   }
 
+      //7. fungsi generete deskripsi otomatis berdasarkan gambar
+      //panggil fungsi ini setelah gambar dipilih 
+      Future<void> _generateDescriptionWithAI() async {
+      if (_base64Image == null) return;
+
+      setState(() => _isGenerating = true);
+      try {
+        const apiKey = '';
+        const apiUrl = '';
+            final body = jsonEncode({
+          "contents": [
+            {
+              "parts": [
+                {
+                  "inlineData": {
+                    "mimeType": "image/jpeg",
+                    "data": _base64Image,
+                  },
+                },
+                {
+                  "text": '''
+    Berdasarkan foto ini, identifikasi satu kategori utama kerusakan fasilitas umum
+    dari daftar berikut: Jalan Rusak, Lampu Jalan Mati, Lahan Arah, Tembok di Jalan,
+    Tidak Pakai Helm dan Lainnya.
+
+    Pilih kategori yang paling dominan atau paling mendesak untuk dilaporkan.
+
+    Buat deskripsi singkat untuk laporan perbaikan, dan tambahkan permohonan
+    perbaikan.
+
+    Fokus pada kerusakan yang terlihat dan hindari spekulasi.
+
+    Format output yang diinginkan:
+    Kategori: [satu kategori yang dipilih]
+    Deskripsi: [deskripsi singkat]
+    ''',
+                },
+              ],
+            },
+          ],
+        });
+        final headers = {
+      'Content-Type': 'application/json',
+    };
+
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: headers,
+      body: body,
+    );
+
+    if (response.statusCode == 200) {
+      // success
+    } else {
+      debugPrint('Request failed: ${response.body}');
+    }
+
+    } catch (e) {
+      debugPrint('Failed to generate AI description: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _isGenerating = false);
+      }
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
