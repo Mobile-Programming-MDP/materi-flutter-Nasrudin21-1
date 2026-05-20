@@ -21,9 +21,9 @@ class _AddPostScreenState extends State<AddPostScreen> {
   String? _latitude;
   String? _longitude;
   String? _category;
-  bool _isGenerating = false;
   bool _isSubmitting = false;
   bool _isGettingLocation = false;
+  bool _isGenerating = false;
   List<String> get categories {
     return [
       'Jalan Rusak',
@@ -31,6 +31,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
       'Lawan Arah',
       'Merokok di Jalan',
       'Tidak Pakai Helm',
+      'Lainnya',
     ];
   }
 
@@ -42,6 +43,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
       final bytes = await image.readAsBytes();
       setState(() {
         _base64Image = base64Encode(bytes);
+        _generateDescriptionWithAI(); // Panggil fungsi AI setelah gambar dipilih
       });
     }
   }
@@ -203,6 +205,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
         ),
       );
       if (!mounted) return;
+      await sendNotificationToTopic(_descriptionController.text, fullName!);
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Posting berhasil disimpan")));
@@ -221,7 +225,103 @@ class _AddPostScreenState extends State<AddPostScreen> {
     }
   }
 
+  //7. Fungsi generate description otomatis berdasarkan gambar
+  //Panggil fungsi ini setelah gambar dipilih
+  Future<void> _generateDescriptionWithAI() async {
+    if (_base64Image == null) return;
+    setState(() => _isGenerating = true);
+    try {
 
+            final body = jsonEncode({
+        "contents": [
+          {
+            "parts": [
+              {
+                "inlineData": {"mimeType": "image/jpeg", "data": _base64Image},
+              },
+              {
+                "text":
+                    "Berdasarkan foto ini, identifikasi satu kategori utama kerusakan fasilitas umum "
+                    "dari daftar berikut: Jalan Rusak, Lampu Jalan Mati, Lawan Arah, Merokok di Jalan, Tidak Pakai Helm dan Lainnya. "
+                    "Pilih kategori yang paling dominan atau paling mendesak untuk dilaporkan. "
+                    "Buat deskripsi singkat untuk laporan perbaikan, dan tambahkan permohonan perbaikan. "
+                    "Fokus pada kerusakan yang terlihat dan hindari spekulasi.\n\n"
+                    "Format output yang diinginkan:\n"
+                    "Kategori: [satu kategori yang dipilih]\n"
+                    "Deskripsi: [deskripsi singkat]",
+              },
+            ],
+          },
+        ],
+      });
+      final headers = {'Content-Type': 'application/json'};
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: headers,
+        body: body,
+      );
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        final text =
+            jsonResponse['candidates'][0]['content']['parts'][0]['text'];
+        print("AI TEXT: $text");
+        if (text != null && text.isNotEmpty) {
+          final lines = text.trim().split('\n');
+          String? aicategory;
+          String? aidescription;
+          for (var line in lines) {
+            final lower = line.toLowerCase();
+            if (lower.startsWith('kategori:')) {
+              aicategory = line.substring(9).trim();
+            } else if (lower.startsWith('deskripsi:')) {
+              aidescription = line.substring(11).trim();
+            }
+          }
+          aidescription ??= text.trim();
+          setState(() {
+            _category = aicategory ?? 'Tidak diketahui';
+            _descriptionController.text = aidescription!;
+          });
+        }
+      } else {
+        debugPrint('Request failed: ${response.body}');
+      }
+    } catch (e) {
+      debugPrint('Failed to generate AI description: $e');
+    } finally {
+      if (mounted) setState(() => _isGenerating = false);
+    }
+  }
+
+  Future<void> sendNotificationToTopic(String body, String senderName) async {
+    final url = Uri.parse('https://cepu-cloud-if.vercel.app/send-to-topic');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        "topic": "berita",
+        "title": "🔔 Laporan Baru",
+        "body": body,
+        "senderName": senderName,
+        "senderPhotoUrl":
+            "https://static.vecteezy.com/system/resources/thumbnails/041/642/167/small_2x/ai-generated-portrait-of-handsome-smiling-young-man-with-folded-arms-isolated-free-png.png",
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Notofikasi berhasil dikirim")));
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Notifikasi gagal dikirim")));
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -229,71 +329,6 @@ class _AddPostScreenState extends State<AddPostScreen> {
     super.dispose();
   }
 
-      //7. fungsi generete deskripsi otomatis berdasarkan gambar
-      //panggil fungsi ini setelah gambar dipilih 
-      Future<void> _generateDescriptionWithAI() async {
-      if (_base64Image == null) return;
-
-      setState(() => _isGenerating = true);
-      try {
-        const apiKey = '';
-        const apiUrl = '';
-            final body = jsonEncode({
-          "contents": [
-            {
-              "parts": [
-                {
-                  "inlineData": {
-                    "mimeType": "image/jpeg",
-                    "data": _base64Image,
-                  },
-                },
-                {
-                  "text": '''
-    Berdasarkan foto ini, identifikasi satu kategori utama kerusakan fasilitas umum
-    dari daftar berikut: Jalan Rusak, Lampu Jalan Mati, Lahan Arah, Tembok di Jalan,
-    Tidak Pakai Helm dan Lainnya.
-
-    Pilih kategori yang paling dominan atau paling mendesak untuk dilaporkan.
-
-    Buat deskripsi singkat untuk laporan perbaikan, dan tambahkan permohonan
-    perbaikan.
-
-    Fokus pada kerusakan yang terlihat dan hindari spekulasi.
-
-    Format output yang diinginkan:
-    Kategori: [satu kategori yang dipilih]
-    Deskripsi: [deskripsi singkat]
-    ''',
-                },
-              ],
-            },
-          ],
-        });
-        final headers = {
-      'Content-Type': 'application/json',
-    };
-
-    final response = await http.post(
-      Uri.parse(apiUrl),
-      headers: headers,
-      body: body,
-    );
-
-    if (response.statusCode == 200) {
-      // success
-    } else {
-      debugPrint('Request failed: ${response.body}');
-    }
-
-    } catch (e) {
-      debugPrint('Failed to generate AI description: $e');
-    } finally {
-      if (mounted) {
-        setState(() => _isGenerating = false);
-      }
-    }
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -305,10 +340,24 @@ class _AddPostScreenState extends State<AddPostScreen> {
           children: [
             _buildImagePreview(),
             const SizedBox(height: 12),
-            OutlinedButton(
-              onPressed: _isSubmitting ? null : pickImageAndConvert,
-              child: const Text('Pick Image'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                OutlinedButton(
+                  onPressed: _isGenerating ? null : pickImageAndConvert,
+                  child: Text(_isGenerating ? 'Generating...' : 'Select Image'),
+                ),
+                const SizedBox(width: 16),
+                if (!_isGenerating && _base64Image != null)
+                  OutlinedButton(
+                    onPressed: _isGenerating
+                        ? null
+                        : _generateDescriptionWithAI,
+                    child: Text('Generate Description'),
+                  ),
+              ],
             ),
+
             const SizedBox(height: 16),
             OutlinedButton(
               onPressed: _isSubmitting ? null : _showCategorySelect,
@@ -330,7 +379,6 @@ class _AddPostScreenState extends State<AddPostScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
-            
             const SizedBox(height: 16),
             OutlinedButton(
               onPressed: (_isSubmitting || _isGettingLocation)
